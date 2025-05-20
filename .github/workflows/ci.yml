@@ -43,6 +43,16 @@ jobs:
 
     steps:
 
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          path: snapshot
+
+      - name: Checkout boost-root
+        uses: actions/checkout@v4
+        with:
+          path: boost-root
+          repository: boostorg/boost
 
       - name: Setup Boost
         run: |
@@ -90,23 +100,10 @@ jobs:
                 DEPINST_ARGS+=("--git_args" "--jobs $GIT_FETCH_JOBS")
             fi
             mkdir -p snapshot
-            cd snapshot
-            echo "Downloading library snapshot: https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_SHA}.tar.gz"
-            curl -L --retry "$NET_RETRY_COUNT" -o "${LIBRARY}-${GITHUB_SHA}.tar.gz" "https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_SHA}.tar.gz"
-            tar -xf "${LIBRARY}-${GITHUB_SHA}.tar.gz"
-            if [ ! -d "${LIBRARY}-${GITHUB_SHA}" ]
-            then
-                echo "Library snapshot does not contain the library directory ${LIBRARY}-${GITHUB_SHA}:"
-                ls -la
-                exit 1
-            fi
-            rm -f "${LIBRARY}-${GITHUB_SHA}.tar.gz"
-            cd ..
-            git clone -b "$BOOST_BRANCH" --depth 1 "https://github.com/boostorg/boost.git" "boost-root"
             cd boost-root
             mkdir -p libs
             rm -rf "libs/$LIBRARY"
-            mv -f "../snapshot/${LIBRARY}-${GITHUB_SHA}" "libs/$LIBRARY"
+            cp -a "../snapshot" "libs/$LIBRARY"
             rm -rf "../snapshot"
             git submodule update --init tools/boostdep
             DEPINST_ARGS+=("$LIBRARY")

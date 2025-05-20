@@ -124,6 +124,7 @@ jobs:
       - name: Run tests
         if: matrix.cmake_tests == ''
         run: |
+            set -x
             cd boost-root
             B2_ARGS=("-j" "$BUILD_JOBS" "toolset=${{matrix.toolset}}" "cxxstd=${{matrix.cxxstd}}")
             if [ -n "${{matrix.build_variant}}" ]
